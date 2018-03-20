@@ -1,0 +1,10 @@
+C:\Iskola\Debreceni Egyetem\felev2\Kepfeldolgozas\beadandók\4\segment\segment\bin\Debug\segment.exe.config
+C:\Iskola\Debreceni Egyetem\felev2\Kepfeldolgozas\beadandók\4\segment\segment\bin\Debug\segment.exe
+C:\Iskola\Debreceni Egyetem\felev2\Kepfeldolgozas\beadandók\4\segment\segment\bin\Debug\segment.pdb
+C:\Iskola\Debreceni Egyetem\felev2\Kepfeldolgozas\beadandók\4\segment\segment\obj\Debug\segment.csprojResolveAssemblyReference.cache
+C:\Iskola\Debreceni Egyetem\felev2\Kepfeldolgozas\beadandók\4\segment\segment\obj\Debug\segment.Form1.resources
+C:\Iskola\Debreceni Egyetem\felev2\Kepfeldolgozas\beadandók\4\segment\segment\obj\Debug\segment.Properties.Resources.resources
+C:\Iskola\Debreceni Egyetem\felev2\Kepfeldolgozas\beadandók\4\segment\segment\obj\Debug\segment.csproj.GenerateResource.Cache
+C:\Iskola\Debreceni Egyetem\felev2\Kepfeldolgozas\beadandók\4\segment\segment\obj\Debug\segment.csproj.CoreCompileInputs.cache
+C:\Iskola\Debreceni Egyetem\felev2\Kepfeldolgozas\beadandók\4\segment\segment\obj\Debug\segment.exe
+C:\Iskola\Debreceni Egyetem\felev2\Kepfeldolgozas\beadandók\4\segment\segment\obj\Debug\segment.pdb
