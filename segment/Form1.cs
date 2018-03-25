@@ -19,16 +19,20 @@ namespace segment
         }
 
 
+        enum RowType
+        {
+            White,
+            Text
+        }
 
+        public static LinkedList<KeyValuePair<int, Color[,]>> feherSorok = new LinkedList<KeyValuePair<int, Color[,]>>();
+        public static LinkedList<KeyValuePair<int, Color[,]>> szovegSorok = new LinkedList<KeyValuePair<int, Color[,]>>();
 
-        public static LinkedList<KeyValuePair<int, Color[,]>> feherSorok = new LinkedList<KeyValuePair<int, Color[,]>>(); //not relevant
-        public static LinkedList<KeyValuePair<int, Color[,]>> szovegSorok = new LinkedList<KeyValuePair<int, Color[,]>>(); //not relevant
-
-        public static LinkedList<KeyValuePair<int, int>> feherSorokPozicio = new LinkedList<KeyValuePair<int, int>>();
-        public static LinkedList<KeyValuePair<int, int>> szovegSorokPozicio = new LinkedList<KeyValuePair<int, int>>();
+        public static List<KeyValuePair<int, int>> feherSorokPozicio = new List<KeyValuePair<int, int>>();
+        public static List<KeyValuePair<int, int>> szovegSorokPozicio = new List<KeyValuePair<int, int>>();
 
         public static LinkedList<KeyValuePair<int, KeyValuePair<int, int>>> betuPoziciok = new LinkedList<KeyValuePair<int, KeyValuePair<int, int>>>();
-        public static LinkedList<KeyValuePair<int, KeyValuePair<int, int>>> betuSpacePoziciok = new LinkedList<KeyValuePair<int, KeyValuePair<int, int>>>();
+        public static LinkedList<KeyValuePair<KeyValuePair<int, int>, KeyValuePair<int, int>>> betuSpacePoziciok = new LinkedList<KeyValuePair<KeyValuePair<int, int>, KeyValuePair<int, int>>>();
 
         class Segment
         {
@@ -36,14 +40,15 @@ namespace segment
             public int row2 = 0;
             public int Column_To = 0;
             public bool FirstColCheck = true;
+            public int processingRowIndex = 0;
 
             public void ReadImage()
             {
-                Image = new Bitmap(@"C:\Iskola\Debreceni Egyetem\felev2\Kepfeldolgozas\beadandók\4\kepkicsi.png");
+                Image = new Bitmap(@"F:\Iskola\DebreceniEgyetem\MSc\felev2\Kepfeldolgozas\character-segment\szoveg.png");
             }
 
 
-            public bool WhiteRow(int row)
+            public bool IsRowWhite(int row)
             {
                 for (int j = 0; j < Image.Width; j++)
                 {
@@ -82,7 +87,7 @@ namespace segment
 
                 int start = -1;
 
-                while (WhiteRow(row2) && row2 != Image.Height - 1)
+                while (IsRowWhite(row2) && row2 != Image.Height - 1)
                 {
                     if (start == -1)
                     {
@@ -95,21 +100,19 @@ namespace segment
                     }
                 }
 
-                feherSorokPozicio.AddLast(new KeyValuePair<int, int>(start, row2));
+                feherSorokPozicio.Add(new KeyValuePair<int, int>(start, row2));
 
                 if (row2 < Image.Height - 1)
                 {
                     SeparateTextRows();
                 }
-
-
             }
 
             public void SeparateTextRows()
             {
                 int start = -1;
 
-                while (!WhiteRow(row2) && row2 != Image.Height - 1)
+                while (!IsRowWhite(row2) && row2 != Image.Height - 1)
                 {
                     if (start == -1)
                     {
@@ -122,7 +125,7 @@ namespace segment
                     }
                 }
 
-                szovegSorokPozicio.AddLast(new KeyValuePair<int, int>(start, row2));
+                szovegSorokPozicio.Add(new KeyValuePair<int, int>(start, row2));
 
                 if (row2 < Image.Height - 1)
                 {
@@ -133,9 +136,12 @@ namespace segment
 
             public void ScanImage()
             {
+                var previousRowType = RowType.White;
+                var rowType = RowType.White;
+
                 for (int row = 0; row < Image.Height; row++)
                 {
-                    bool IsWhite = WhiteRow(row);
+                    bool isWhite = IsRowWhite(row);
 
                     Color[,] sor = new Color[1, Image.Size.Width];
                     for (int i = 0; i < Image.Width; i++)
@@ -145,19 +151,26 @@ namespace segment
 
 
                     KeyValuePair<int, Color[,]> kv = new KeyValuePair<int, Color[,]>(row, sor);
+                    previousRowType = rowType;
 
-                    if (IsWhite)
+                    if (isWhite)
                     {
                         feherSorok.AddLast(kv);
+                        rowType = RowType.White;
                     }
                     else
                     {
                         szovegSorok.AddLast(kv);
+                        rowType = RowType.Text;
+                    }
+
+                    if (previousRowType != rowType)
+                    {
+                        var sorok = feherSorok.ToArray();
                     }
                 }
 
                 SeparateWhiteRows();
-
             }
 
             public void PaintRows()
@@ -210,84 +223,90 @@ namespace segment
 
             public void SeparateWhiteCols()
             {
-                foreach (var szovegSor in szovegSorokPozicio)
+                if (processingRowIndex >= szovegSorokPozicio.Count) return;
+
+                int textRowFrom = szovegSorokPozicio[processingRowIndex].Key;
+                int textRowTo = szovegSorokPozicio[processingRowIndex].Value;
+
+                int Column_From = -1;
+                while (WhiteCol(textRowFrom, textRowTo, Column_To) && Column_To < Image.Width - 1)
                 {
-                    int row = szovegSor.Key;
-                    int row2 = szovegSor.Value;
-
-
-                    int Column_From = -1;
-                    while (WhiteCol(row, row2, Column_To) && Column_To != Image.Width - 1)
+                    if (Column_From == -1)
                     {
-                        if (Column_From == -1)
-                        {
-                            Column_From = Column_To;
-                        }
-
-                        if (Column_To < Image.Width - 1)
-                        {
-                            Column_To++;
-                        }
+                        Column_From = Column_To;
                     }
-
-                    betuSpacePoziciok.AddLast(new KeyValuePair<int, KeyValuePair<int, int>>(Column_To, new KeyValuePair<int, int>(Column_From, Column_To)));
 
                     if (Column_To < Image.Width - 1)
                     {
-                        SeparateTextCols();
+                        Column_To++;
                     }
+                }
 
+                var a = new KeyValuePair<int, int>(textRowFrom, textRowTo);
+                var b = new KeyValuePair<int, int>(Column_From, Column_To);
+                betuSpacePoziciok.AddLast(new KeyValuePair<KeyValuePair<int, int>, KeyValuePair<int, int>>(a, b));
 
+                if (Column_To < Image.Width - 1)
+                {
+                    SeparateTextCols();
+                }
+                else
+                {
+                    processingRowIndex++;
+                    Column_To = 0;
+                    SeparateWhiteCols();
                 }
             }
 
             public void SeparateTextCols()
             {
-                foreach (var szovegSor in szovegSorokPozicio)
+                if (processingRowIndex >= szovegSorokPozicio.Count) return;
+
+                int textRowFrom = szovegSorokPozicio[processingRowIndex].Key;
+                int textRowTo = szovegSorokPozicio[processingRowIndex].Value;
+
+                int Column_From = -1;
+                while (!WhiteCol(textRowFrom, textRowTo, Column_To) && Column_To < Image.Width - 1)
                 {
-                    int row = szovegSor.Key;
-                    int row2 = szovegSor.Value;
-
-
-                    int Column_From = -1;
-                    while (!WhiteCol(row, row2, Column_To) && Column_To != Image.Width - 1)
+                    if (Column_From == -1)
                     {
-                        if (Column_From == -1)
-                        {
-                            Column_From = Column_To;
-                        }
-
-                        if (Column_To < Image.Width - 1)
-                        {
-                            Column_To++;
-                        }
+                        Column_From = Column_To;
                     }
-
-                    betuPoziciok.AddLast(new KeyValuePair<int, KeyValuePair<int, int>>(Column_To, new KeyValuePair<int, int>(Column_From, Column_To)));
 
                     if (Column_To < Image.Width - 1)
                     {
-                        SeparateWhiteCols();
+                        Column_To++;
                     }
+                }
 
+                betuPoziciok.AddLast(new KeyValuePair<int, KeyValuePair<int, int>>(Column_To, new KeyValuePair<int, int>(Column_From, Column_To)));
+
+                if (Column_To < Image.Width - 1)
+                {
+                    SeparateWhiteCols();
+                }
+                else
+                {
+                    processingRowIndex++;
+                    Column_To = 0;
+                    SeparateTextCols();
                 }
             }
 
             public void PaintWhiteCols()
             {
-                foreach (var oszlop in betuSpacePoziciok)
+                foreach (var betuSpace in betuSpacePoziciok)
                 {
-                    if (oszlop.Value.Key != -1)
+                    var sor = betuSpace.Key;
+                    var oszlop = betuSpace.Value;
+
+                    for (int i = sor.Key; i < sor.Value; i++)
                     {
-                        for (int i = oszlop.Value.Key; i < oszlop.Value.Value; i++)
+                        for (int j = oszlop.Key; j < oszlop.Value; j++)
                         {
-                            for (int j = 0; j < Image.Height; j++)
-                            {
-                                Image.SetPixel(i, j, Color.YellowGreen);
-                            }
+                            Image.SetPixel(j, i, Color.YellowGreen);
                         }
                     }
-
                 }
             }
 
